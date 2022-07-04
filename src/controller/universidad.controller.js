@@ -12,19 +12,23 @@ exports.findAll = (req, res) => {
   });
 };
 
-exports.findAllPublic = (req, res) => {
-  Universidad.getAllPublic((err, data) => {
-    if (err) res.status(500).send({message: 'Ocurrio un error al obtener la lista de universidades publicas.'})
-    else res.status(200).send(data);
-  });
-};
-
-exports.findAllPrivate = (req, res) => {
-  Universidad.getAllPrivate((err, data) => {
-    if (err) res.status(500).send({message: 'Ocurrio un error al obtener la lista de universidades privadas.'})
-    else res.status(200).send(data);
-  });
-};
+exports.universidadType = (req, res) => {
+  if (isNaN(req.params.tipo)) {
+    res.status(400).send({
+      message: "El tipo debe universidad es erroneo"
+    });
+  } else {
+    Universidad.getType(req.params.tipo, (err, data) => {
+      if (err) {
+        res.status(500).send({
+          message: "Ocurrio un error al obtener el tipo de la universidad"
+        });
+      } else {
+        res.send(data);
+      }
+    });
+  }
+}
 
 exports.findById = (req, res) => {
   if (isNaN(req.params.id)) {
