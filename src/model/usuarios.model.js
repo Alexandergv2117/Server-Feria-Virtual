@@ -51,7 +51,7 @@ Users.checkEmail = (email, result) => {
 }
 
 /**
- * Verifica si el ID del usuario, segun el token esta registrado.
+ * Verifica si el ID del usuario, segun el token, esta registrado.
  * @function  findById
  * @param {string} ID Id del usuario (proporcionado por el token).
  * @param {callback} result Maneja el error y la respuesta, si esta es exitosa (true o false).
@@ -72,11 +72,14 @@ Users.findById = (id, result) => {
     })
 
 }
+
+
+
 /**
- * Obtiene la lista de universidades con sus datos mas relevantes.
- * @function  findByIdGet
- * @param {string} id ID del usuario proporcionado por el token.
- * @param {callback} result Maneja el error y la respuesta, si esta es exitosa.
+ * Devuelve los datos del usuario segun el token.
+ * @function  findByIdData
+ * @param {string} ID Id del usuario (proporcionado por el token).
+ * @param {callback} result Maneja el error y la respuesta, si esta es exitosa (true o false).
  */
 Users.findByIdGet = (id, result) => {
     pool.query(`SELECT * FROM registrado WHERE ID='${id}'`,

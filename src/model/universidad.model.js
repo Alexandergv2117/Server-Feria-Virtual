@@ -24,6 +24,37 @@ Universidad.getAll = (result) => {
     });
 };
 
+
+/**
+ * Obtiene la lista de universidades publicas con sus datos mas relevantes.
+ * @function  getAllPublic
+ * @param {callback} result Maneja el error y la respuesta, si esta es exitosa.
+ */
+Universidad.getAllPublic = (result) => {
+    let query = "SELECT universidad.ID AS Universidad_ID, universidad.Nombre, universidad.Ruta_Escudo, IF(universidad.Tipo=0,'Publica','Privada') AS Tipo, COUNT(IF(nivel_educativo.Nombre='LICENCIATURA',1, NULL)) AS LICENCIATURA, COUNT(IF(nivel_educativo.Nombre='MAESTR&IACUTE;A',1, NULL)) AS MAESTRIA, COUNT(IF(nivel_educativo.Nombre='DOCTORADO',1, NULL)) AS DOCTORADO FROM universidad INNER JOIN carrera ON universidad.ID = carrera.Universidad_ID INNER JOIN nivel_educativo ON carrera.Nivel_Educativo_ID = nivel_educativo.ID WHERE universidad.Tipo=0 GROUP BY universidad.ID";
+    pool.query(query, (err, res) => {
+        if (err) {
+            result(null, {message: 'Ocurrio un error al obtener la lista de universidades publicas'})
+        }
+        result(null, res);
+    })
+}
+
+/**
+ * Obtiene la lista de universidades privadas con sus datos mas relevantes.
+ * @function  getAllPrivate
+ * @param {callback} result Maneja el error y la respuesta, si esta es exitosa.
+ */
+Universidad.getAllPrivate = (result) => {
+    let query = "SELECT universidad.ID AS Universidad_ID, universidad.Nombre, universidad.Ruta_Escudo, IF(universidad.Tipo=0,'Publica','Privada') AS Tipo, COUNT(IF(nivel_educativo.Nombre='LICENCIATURA',1, NULL)) AS LICENCIATURA, COUNT(IF(nivel_educativo.Nombre='MAESTR&IACUTE;A',1, NULL)) AS MAESTRIA, COUNT(IF(nivel_educativo.Nombre='DOCTORADO',1, NULL)) AS DOCTORADO FROM universidad INNER JOIN carrera ON universidad.ID = carrera.Universidad_ID INNER JOIN nivel_educativo ON carrera.Nivel_Educativo_ID = nivel_educativo.ID WHERE universidad.Tipo=1 GROUP BY universidad.ID";
+    pool.query(query, (err, res) => {
+        if (err) {
+            result(null, {message: 'Ocurrio un error al obtener la lista de universidades privadas'})
+        }
+        result(null, res);
+    })
+}
+
 /**
  * Se encarga de consultar los datos de una universidad especifica y responder tales datos.
  * @function getById

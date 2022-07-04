@@ -17,7 +17,33 @@
   * @response {JSON} Universidades Responde con los datos de la universidades.
   */
  router.get("/", universidad.findAll);
+
+ /**
+  * Obtiene los datos de las universidades publicas
+  * 
+  * @name Universidades_Publicas
+  * @path {GET} /v1/universidad/publica
+  * @code {200} Si la solicitud es exitosa.
+  * @code {400} Si falla la peticion.
+  * @code {500} Si la solicitud fallo por error en la base de datos.
+  * @response {JSON} Universidades Responde con los datos de la universidades publicas.
+  */
+
+ router.get("/:tipo=publica", universidad.findAllPublic)
  
+ /**
+  * Obtiene los datos de las universidades privadas
+  * 
+  * @name Universidades_Publicas
+  * @path {GET} /v1/universidad/privada
+  * @code {200} Si la solicitud es exitosa.
+  * @code {400} Si falla la peticion.
+  * @code {500} Si la solicitud fallo por error en la base de datos.
+  * @response {JSON} Universidades Responde con los datos de la universidades privadas.
+  */
+
+  router.get("/:tipo=privada", universidad.findAllPrivate)
+
  /**
   * Obtiene los datos de una universidad
   * 

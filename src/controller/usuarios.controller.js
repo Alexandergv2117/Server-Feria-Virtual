@@ -8,7 +8,7 @@ exports.getUserData = (req, res) => {
                     error: err.message || 'Intenra de nuevo mas tarde'
                 })
             } else {
-                res.status(200).json({...user._doc, token: req.token});
+                res.status(200).json({...data._doc, token: req.token});
             }
         }); 
     } catch (err) {

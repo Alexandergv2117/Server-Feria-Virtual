@@ -12,6 +12,20 @@ exports.findAll = (req, res) => {
   });
 };
 
+exports.findAllPublic = (req, res) => {
+  Universidad.getAllPublic((err, data) => {
+    if (err) res.status(500).send({message: 'Ocurrio un error al obtener la lista de universidades publicas.'})
+    else res.status(200).send(data);
+  });
+};
+
+exports.findAllPrivate = (req, res) => {
+  Universidad.getAllPrivate((err, data) => {
+    if (err) res.status(500).send({message: 'Ocurrio un error al obtener la lista de universidades privadas.'})
+    else res.status(200).send(data);
+  });
+};
+
 exports.findById = (req, res) => {
   if (isNaN(req.params.id)) {
     res.status(400).send({
