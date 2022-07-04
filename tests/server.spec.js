@@ -37,6 +37,28 @@ describe('GET /v1/universidad/:id', () => {
     })
 });
 
+describe('GET /v1/universidad/tipo/:tipo', () => {
+    test('should respond with a 200 status code', async () => {
+        const response = await request(app).get('/v1/universidad/tipo/1').send();
+        expect(response.status).toBe(200);
+    })
+
+    test('should respond with a 400 status code', async () => {
+        const response = await request(app).get('/v1/universidad/tipo/as').send();
+        expect(response.status).toBe(400);
+    })
+
+    test('should respond with a 500 status code', async () => {
+        const response = await request(app).get('/v1/universidad/tipo/3').send();
+        expect(response.status).toBe(500);
+    })
+
+    test('should respond with a Object', async () => {
+        const response = await request(app).get('/v1/universidad/tipo/1').send();
+        expect(response.body).toBeInstanceOf(Object);
+    })
+})
+
 describe('GET /v1/universidad/area/:id', () => {
     test('should respond with a 200 status code', async () => {
         const response = await request(app).get('/v1/universidad/area/1').send();
