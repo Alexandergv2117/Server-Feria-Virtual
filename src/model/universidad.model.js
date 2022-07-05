@@ -13,14 +13,22 @@ const Universidad = function () {
  * @param {callback} result Maneja el error y la respuesta, si esta es exitosa.
  */
 Universidad.getAll = (result) => {
-    let query = "SELECT universidad.ID AS Universidad_ID, universidad.Nombre, universidad.Ruta_Escudo, IF(universidad.Tipo=0,'Publica','Privada') AS Tipo, COUNT(IF(nivel_educativo.Nombre='LICENCIATURA',1, NULL)) AS LICENCIATURA, COUNT(IF(nivel_educativo.Nombre='MAESTR&IACUTE;A',1, NULL)) AS MAESTRIA, COUNT(IF(nivel_educativo.Nombre='DOCTORADO',1, NULL)) AS DOCTORADO FROM universidad INNER JOIN carrera ON universidad.ID = carrera.Universidad_ID INNER JOIN nivel_educativo ON carrera.Nivel_Educativo_ID = nivel_educativo.ID GROUP BY universidad.ID ORDER BY universidad.ID ASC";
+    let query = "SELECT universidad.ID AS Universidad_ID, universidad.Nombre, universidad.Ruta_Escudo, IF(universidad.Tipo=0,'Publica','Privada') AS Tipo, COUNT(IF(nivel_educativo.Nombre='LICENCIATURA',1, NULL)) AS LICENCIATURA, COUNT(IF(nivel_educativo.Nombre='MAESTR&IACUTE;A',1, NULL)) AS MAESTRIA, COUNT(IF(nivel_educativo.Nombre='DOCTORADO',1, NULL)) AS DOCTORADO, GROUP_CONCAT(DISTINCT carrera.Nombre) Carreras FROM universidad INNER JOIN carrera ON universidad.ID = carrera.Universidad_ID INNER JOIN nivel_educativo ON carrera.Nivel_Educativo_ID = nivel_educativo.ID GROUP BY universidad.ID ORDER BY universidad.ID ASC";
     pool.query(query, (err, res) => {
         if (err) {
             console.log("error: ", err);
             result(null, { message: "Ocurrio un error al obtener las universidades" });
             return;
         }
-        result(null, res);
+
+        const dataUni = res.map(dataUni => {
+            return {
+                ...dataUni,
+                Carreras: dataUni.Carreras.split(',')
+            }
+        });
+
+        result(null, dataUni);
     });
 };
 
