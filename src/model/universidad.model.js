@@ -1,6 +1,7 @@
 /**
  * @module UniversidadModel
  */
+const { object } = require('joi');
 const pool = require('./connectDatabase');
 
 const Universidad = function () {
@@ -13,7 +14,31 @@ const Universidad = function () {
  * @param {callback} result Maneja el error y la respuesta, si esta es exitosa.
  */
 Universidad.getAll = (result) => {
-    let query = "SELECT universidad.ID AS Universidad_ID, universidad.Nombre, universidad.Ruta_Escudo, IF(universidad.Tipo=0,'Publica','Privada') AS Tipo, COUNT(IF(nivel_educativo.Nombre='LICENCIATURA',1, NULL)) AS LICENCIATURA, COUNT(IF(nivel_educativo.Nombre='MAESTR&IACUTE;A',1, NULL)) AS MAESTRIA, COUNT(IF(nivel_educativo.Nombre='DOCTORADO',1, NULL)) AS DOCTORADO,IF(COUNT(beca.Titulo) > 0, 1, 0) AS BECA,GROUP_CONCAT(DISTINCT carrera.Nombre) Carreras FROM universidad INNER JOIN carrera ON universidad.ID = carrera.Universidad_ID INNER JOIN nivel_educativo ON carrera.Nivel_Educativo_ID = nivel_educativo.ID LEFT JOIN beca ON universidad.ID = beca.Universidad_ID GROUP BY universidad.ID ORDER BY universidad.ID ASC";
+    let query = `
+    SELECT 
+        universidad.ID AS Universidad_ID, 
+        universidad.Nombre, 
+        universidad.Ruta_Escudo, 
+        IF(universidad.Tipo=0,'Publica','Privada') AS Tipo, 
+        COUNT(IF(nivel_educativo.Nombre='LICENCIATURA',1, NULL)) AS LICENCIATURA, 
+        COUNT(IF(nivel_educativo.Nombre='MAESTR&IACUTE;A',1, NULL)) AS MAESTRIA, 
+        COUNT(IF(nivel_educativo.Nombre='DOCTORADO',1, NULL)) AS DOCTORADO, 
+        IF(COUNT(beca.Titulo) > 0, 1, 0) AS BECA, 
+        GROUP_CONCAT(DISTINCT carrera.Nombre) Carreras,
+        GROUP_CONCAT(DISTINCT carrera.Recurso) RecursoCarreras 
+    FROM 
+        universidad 
+    INNER JOIN 
+        carrera ON 
+        universidad.ID = carrera.Universidad_ID 
+    INNER JOIN 
+        nivel_educativo ON 
+        carrera.Nivel_Educativo_ID = nivel_educativo.ID 
+    LEFT JOIN beca ON 
+        universidad.ID = beca.Universidad_ID 
+    GROUP BY universidad.ID 
+    ORDER BY universidad.ID 
+    ASC`;
     pool.query(query, (err, res) => {
         if (err) {
             console.log("error: ", err);
@@ -21,14 +46,19 @@ Universidad.getAll = (result) => {
             return;
         }
 
-        const dataUni = res.map(dataUni => {
+        const dataUniversidades = res.map(dataUni => {
             return {
                 ...dataUni,
-                Carreras: dataUni.Carreras.split(',')
+                Carreras: dataUni.Carreras.split(','),
+                RecursoCarreras: dataUni.RecursoCarreras.split(',')
             }
         });
 
-        result(null, dataUni);
+        for (let i = 0; i < dataUniversidades.length; i++) {
+            dataUniversidades[i].LICENCIATURA = dataUniversidades[i].Carreras.length;
+        }
+        
+        result(null, dataUniversidades);
     });
 };
 
@@ -46,7 +76,7 @@ Universidad.getType = (tipoUniversidad, result) => {
             result({ message: "No existe el id en la base de datos" }, null);
             return;
         }
-        
+
         result(null, res);
     })
 }
