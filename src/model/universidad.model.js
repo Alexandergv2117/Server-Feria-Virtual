@@ -150,6 +150,12 @@ Universidad.getById = (id, result) => {
             return;
         }
 
+        /**
+         * Separar las carreras y sus recursos de cada universidad por comas, y agregar el link de youtube.
+         * @function modifyDataUni
+         * @param {Object} dataUniversidades Datos de las universidades.
+         * @returns {Object} Datos de las universidades con sus carreras y recursos separados.
+         */
         const data = res.map(dataUni => {
             return {
                 Universidad_ID: id,
@@ -160,6 +166,12 @@ Universidad.getById = (id, result) => {
             }
         });
 
+        /**
+         * Genera un json de las carreras y sus recursos
+         * @function generateJSON_Carreras
+         * @param {Object} dataUni Datos de la universidad.
+         * @returns {Object} Datos de la universidad y sus recursos. 
+         */
         const dataUniversidad = data.map(dataUni => {
             return {
                 ...dataUni,
