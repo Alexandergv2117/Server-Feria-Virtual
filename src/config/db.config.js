@@ -1,8 +1,8 @@
 module.exports = {
     database: {
-        host: 'db4free.net',
-        user: 'feriavirtual3',
-        password: 'feriavirtual3',
-        database: 'feriavirtual3'
+        host: 'sql5.freemysqlhosting.net',
+        user: 'sql5504283',
+        password: 'VuCcbUF6DQ',
+        database: 'sql5504283'
     }
 };
