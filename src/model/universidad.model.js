@@ -56,7 +56,7 @@ Universidad.getAll = (result) => {
             return {
                 ...dataUni,
                 Carreras: dataUni.Carreras.split(','),
-                RecursoCarreras: dataUni.RecursoCarreras.split(',')
+                //RecursoCarreras: dataUni.RecursoCarreras.split(',')
             }
         });
 
@@ -71,16 +71,16 @@ Universidad.getAll = (result) => {
          */
         for (let i = 0; i < dataUniversidades.length; i++) {
             dataUniversidades[i].LICENCIATURA = dataUniversidades[i].Carreras.length;
-            dataUniversidades[i].Carrera = dataUniversidades[i].Carreras.map(carrera => {
+            /*dataUniversidades[i].Carrera = dataUniversidades[i].Carreras.map(carrera => {
                 return {
                     Nombre: carrera,
                     Recurso: dataUniversidades[i].RecursoCarreras[i]
                 }
-            });
-            delete dataUniversidades[i].Carreras;
+            });*/
+            //delete dataUniversidades[i].Carreras;
             delete dataUniversidades[i].RecursoCarreras;
         }
-        
+
         result(null, dataUniversidades);
     });
 };
@@ -113,7 +113,30 @@ Universidad.getType = (tipoUniversidad, result) => {
 Universidad.getById = (id, result) => {
     const urlYoutube = "https://www.youtube.com/watch?v=";
 
-    let query = `SELECT universidad.Nombre, universidad.Ruta_Escudo, video.Titulo, video.Recurso FROM universidad INNER JOIN video ON universidad.ID = video.Universidad_ID WHERE video.Seccion_ID = 1 AND universidad.ID = ${id}`;
+    let query = `
+    SELECT
+        universidad.ID,
+        universidad.Nombre, 
+        universidad.Ruta_Escudo, 
+        video.Titulo,
+        video.Recurso,
+        IF(universidad.Tipo=0,'Publica','Privada') AS Tipo,
+        GROUP_CONCAT(DISTINCT carrera.Nombre) Carreras,
+        GROUP_CONCAT(DISTINCT carrera.Recurso) RecursoCarreras
+    FROM
+        universidad
+    INNER JOIN video
+    ON 
+        universidad.ID = video.Universidad_ID
+    INNER JOIN carrera 
+        ON 
+    universidad.ID = carrera.Universidad_ID 
+        INNER JOIN nivel_educativo 
+        ON 
+    carrera.Nivel_Educativo_ID = nivel_educativo.ID 
+    WHERE
+        video.Seccion_ID = 1 AND
+        universidad.ID = ${id}`;
 
     pool.query(query, (err, res) => {
         if (err) {
@@ -131,11 +154,27 @@ Universidad.getById = (id, result) => {
             return {
                 Universidad_ID: id,
                 ...dataUni,
-                Recurso: urlYoutube + dataUni.Recurso
+                Recurso: urlYoutube + dataUni.Recurso,
+                Carreras: dataUni.Carreras.split(','),
+                RecursoCarreras: dataUni.RecursoCarreras.split(',')
             }
         });
 
-        result(null, data[0]);
+        const dataUniversidad = data.map(dataUni => {
+            return {
+                ...dataUni,
+                Carreras: dataUni.Carreras.map(carrera => {
+                    return {
+                        Nombre: carrera,
+                        Recurso: dataUni.RecursoCarreras[dataUni.Carreras.indexOf(carrera)]
+                    }
+                })
+            }
+        });
+
+        delete dataUniversidad[0].RecursoCarreras;
+
+        result(null, dataUniversidad[0]);
     });
 };
 
@@ -194,7 +233,7 @@ Universidad.getOfertaEducativa = (id, result) => {
  * @param {string} id Id de la universidad.
  * @param {callback} result  Responde los errores, si los hay y la respuesta.
  */
-Universidad.getMultimedia = (id, result) => {
+getMultimedia = (id, result) => {
 
     getFotos(id, (err, linksFotos) => {
         if (err) {
