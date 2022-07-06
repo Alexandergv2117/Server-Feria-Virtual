@@ -118,25 +118,31 @@ Universidad.getById = (id, result) => {
         universidad.ID,
         universidad.Nombre, 
         universidad.Ruta_Escudo, 
-        video.Titulo,
-        video.Recurso,
         IF(universidad.Tipo=0,'Publica','Privada') AS Tipo,
         GROUP_CONCAT(DISTINCT carrera.Nombre) Carreras,
-        GROUP_CONCAT(DISTINCT carrera.Recurso) RecursoCarreras
+        GROUP_CONCAT(DISTINCT carrera.Recurso) RecursoCarreras,
+        GROUP_CONCAT(DISTINCT video.Titulo) Videos,
+        GROUP_CONCAT(DISTINCT video.Recurso) RecursoVideos,
+        GROUP_CONCAT(DISTINCT foto.Titulo) Fotos,
+        GROUP_CONCAT(DISTINCT foto.Recurso) RecursoFotos
     FROM
         universidad
-    INNER JOIN video
+        INNER JOIN
+        video
     ON 
         universidad.ID = video.Universidad_ID
     INNER JOIN carrera 
-        ON 
-    universidad.ID = carrera.Universidad_ID 
-        INNER JOIN nivel_educativo 
-        ON 
-    carrera.Nivel_Educativo_ID = nivel_educativo.ID 
+    ON 
+        universidad.ID = carrera.Universidad_ID 
+    INNER JOIN 
+        nivel_educativo 
+    ON 
+        carrera.Nivel_Educativo_ID = nivel_educativo.ID
+    INNER JOIN foto
+        ON
+    universidad.ID = foto.Universidad_ID
     WHERE
-        video.Seccion_ID = 1 AND
-        universidad.ID = ${id}`;
+        universidad.ID =${id}`;
 
     pool.query(query, (err, res) => {
         if (err) {
@@ -162,12 +168,16 @@ Universidad.getById = (id, result) => {
                 ...dataUni,
                 Recurso: urlYoutube + dataUni.Recurso,
                 Carreras: dataUni.Carreras.split(','),
-                RecursoCarreras: dataUni.RecursoCarreras.split(',')
+                RecursoCarreras: dataUni.RecursoCarreras.split(','),
+                TituloVideo: dataUni.Videos.split(','),
+                RecursoVideo: dataUni.RecursoVideos.split(','),
+                TituloFoto: dataUni.Fotos.split(','),
+                RecursoFoto: dataUni.RecursoFotos.split(',')
             }
         });
 
         /**
-         * Genera un json de las carreras y sus recursos
+         * Genera un json con los titulos y recurso, de las carreras, fotos y videos de la universidad. 
          * @function generateJSON_Carreras
          * @param {Object} dataUni Datos de la universidad.
          * @returns {Object} Datos de la universidad y sus recursos. 
@@ -180,11 +190,31 @@ Universidad.getById = (id, result) => {
                         Nombre: carrera,
                         Recurso: dataUni.RecursoCarreras[dataUni.Carreras.indexOf(carrera)]
                     }
+                }),
+                Videos: dataUni.TituloVideo.map(video => {
+                    return {
+                        Titulo: video,
+                        Recurso: urlYoutube + dataUni.RecursoVideo[dataUni.TituloVideo.indexOf(video)]
+                    }
+                }),
+                Fotos: dataUni.TituloFoto.map(foto => {
+                    return {
+                        Titulo: foto,
+                        Recurso: dataUni.RecursoFoto[dataUni.TituloFoto.indexOf(foto)]
+                    }
                 })
             }
         });
 
+        //Elimina los datos de la universidad que no se necesitan
         delete dataUniversidad[0].RecursoCarreras;
+        delete dataUniversidad[0].RecursoVideos;
+        delete dataUniversidad[0].RecursoFotos;
+        delete dataUniversidad[0].RecursoFoto;
+        delete dataUniversidad[0].RecursoVideo;
+        delete dataUniversidad[0].TituloFoto;
+        delete dataUniversidad[0].TituloVideo;
+        delete dataUniversidad[0].Recurso;
 
         result(null, dataUniversidad[0]);
     });
@@ -245,7 +275,7 @@ Universidad.getOfertaEducativa = (id, result) => {
  * @param {string} id Id de la universidad.
  * @param {callback} result  Responde los errores, si los hay y la respuesta.
  */
-getMultimedia = (id, result) => {
+ Universidad.getMultimedia = (id, result) => {
 
     getFotos(id, (err, linksFotos) => {
         if (err) {
