@@ -12,6 +12,7 @@ const Universidad = function () {
  * Obtiene la lista de universidades con sus datos mas relevantes.
  * @function  getAll
  * @param {callback} result Maneja el error y la respuesta, si esta es exitosa.
+ * @returns {Object} Lista de datos de las universidades.
  */
 Universidad.getAll = (result) => {
     let query = `
@@ -45,7 +46,12 @@ Universidad.getAll = (result) => {
             result(null, { message: "Ocurrio un error al obtener las universidades" });
             return;
         }
-
+        /**
+         * Separar las carreras y sus recursos de cada universidad por comas.
+         * @function splitCarreras 
+         * @param {Object} dataUniversidades Datos de las universidades.
+         * @returns {Object} Datos de las universidades con sus carreras y recursos separados.
+        */
         const dataUniversidades = res.map(dataUni => {
             return {
                 ...dataUni,
@@ -54,8 +60,25 @@ Universidad.getAll = (result) => {
             }
         });
 
+        /**
+         * Arregla el duplicado de carreras y genera un json de las carreras y sus recursos
+         * @function removeDuplicates
+         * @param {array} array Arreglo de carreras
+         * @returns {array} Arreglo de carreras sin duplicados
+         * @example
+         * removeDuplicates(['carrera1', 'carrera2', 'carrera1'])
+         * // ['carrera1', 'carrera2']
+         */
         for (let i = 0; i < dataUniversidades.length; i++) {
             dataUniversidades[i].LICENCIATURA = dataUniversidades[i].Carreras.length;
+            dataUniversidades[i].Carrera = dataUniversidades[i].Carreras.map(carrera => {
+                return {
+                    Nombre: carrera,
+                    Recurso: dataUniversidades[i].RecursoCarreras[i]
+                }
+            });
+            delete dataUniversidades[i].Carreras;
+            delete dataUniversidades[i].RecursoCarreras;
         }
         
         result(null, dataUniversidades);
