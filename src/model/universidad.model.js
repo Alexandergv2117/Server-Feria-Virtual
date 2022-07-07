@@ -1,7 +1,7 @@
 /**
  * @module UniversidadModel
  */
-const { object } = require('joi');
+const { object, number } = require('joi');
 const pool = require('./connectDatabase');
 
 const Universidad = function () {
@@ -121,8 +121,10 @@ Universidad.getById = (id, result) => {
         IF(universidad.Tipo=0,'Publica','Privada') AS Tipo,
         GROUP_CONCAT(DISTINCT carrera.Nombre) Carreras,
         GROUP_CONCAT(DISTINCT carrera.Recurso) RecursoCarreras,
+        GROUP_CONCAT(DISTINCT video.Seccion_ID) VideoSeccion_ID,
         GROUP_CONCAT(DISTINCT video.Titulo) Videos,
         GROUP_CONCAT(DISTINCT video.Recurso) RecursoVideos,
+        GROUP_CONCAT(DISTINCT foto.Seccion_ID) FotoSeccion_ID,
         GROUP_CONCAT(DISTINCT foto.Titulo) Fotos,
         GROUP_CONCAT(DISTINCT foto.Recurso) RecursoFotos
     FROM
@@ -160,17 +162,18 @@ Universidad.getById = (id, result) => {
          * Separar las carreras y sus recursos de cada universidad por comas, y agregar el link de youtube.
          * @function modifyDataUni
          * @param {Object} dataUniversidades Datos de las universidades.
-         * @returns {Object} Datos de las universidades con sus carreras y recursos separados.
+         * @returns {Object} Datos de las universidades con sus carreras y recursos separados, Seccion_ID se devuelve como entero.
          */
         const data = res.map(dataUni => {
             return {
                 Universidad_ID: id,
                 ...dataUni,
-                Recurso: urlYoutube + dataUni.Recurso,
                 Carreras: dataUni.Carreras.split(','),
                 RecursoCarreras: dataUni.RecursoCarreras.split(','),
+                VideoSeccion_ID: dataUni.VideoSeccion_ID.split(',').map(id => Number(id)),
                 TituloVideo: dataUni.Videos.split(','),
                 RecursoVideo: dataUni.RecursoVideos.split(','),
+                FotoSeccion_ID: dataUni.FotoSeccion_ID.split(',').map(id => Number(id)),
                 TituloFoto: dataUni.Fotos.split(','),
                 RecursoFoto: dataUni.RecursoFotos.split(',')
             }
@@ -193,12 +196,14 @@ Universidad.getById = (id, result) => {
                 }),
                 Videos: dataUni.TituloVideo.map(video => {
                     return {
+                        Seccion_ID: dataUni.VideoSeccion_ID[dataUni.TituloVideo.indexOf(video)] > 0 ? dataUni.VideoSeccion_ID[dataUni.TituloVideo.indexOf(video)] : 0,
                         Titulo: video,
                         Recurso: urlYoutube + dataUni.RecursoVideo[dataUni.TituloVideo.indexOf(video)]
                     }
                 }),
                 Fotos: dataUni.TituloFoto.map(foto => {
                     return {
+                        Seccion_ID: dataUni.FotoSeccion_ID[dataUni.TituloFoto.indexOf(foto)] > 0 ? dataUni.FotoSeccion_ID[dataUni.TituloFoto.indexOf(foto)] : 0,
                         Titulo: foto,
                         Recurso: dataUni.RecursoFoto[dataUni.TituloFoto.indexOf(foto)]
                     }
@@ -214,7 +219,8 @@ Universidad.getById = (id, result) => {
         delete dataUniversidad[0].RecursoVideo;
         delete dataUniversidad[0].TituloFoto;
         delete dataUniversidad[0].TituloVideo;
-        delete dataUniversidad[0].Recurso;
+        delete dataUniversidad[0].VideoSeccion_ID;
+        delete dataUniversidad[0].FotoSeccion_ID;
 
         result(null, dataUniversidad[0]);
     });
@@ -275,7 +281,7 @@ Universidad.getOfertaEducativa = (id, result) => {
  * @param {string} id Id de la universidad.
  * @param {callback} result  Responde los errores, si los hay y la respuesta.
  */
- Universidad.getMultimedia = (id, result) => {
+Universidad.getMultimedia = (id, result) => {
 
     getFotos(id, (err, linksFotos) => {
         if (err) {
