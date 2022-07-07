@@ -126,25 +126,30 @@ Universidad.getById = (id, result) => {
         GROUP_CONCAT(DISTINCT video.Recurso) RecursoVideos,
         GROUP_CONCAT(DISTINCT foto.Seccion_ID) FotoSeccion_ID,
         GROUP_CONCAT(DISTINCT foto.Titulo) Fotos,
-        GROUP_CONCAT(DISTINCT foto.Recurso) RecursoFotos
-    FROM
-        universidad
-        INNER JOIN
-        video
+        GROUP_CONCAT(DISTINCT foto.Recurso) RecursoFotos,
+        ubicacion.url_Maps,
+        CONCAT(Num_Interior, " ", Num_Exterior, " ", Calle, " ", Colonia, " ", Ciudad, " ", municipio.Nombre, " ", Codigo_Postal) AS Direccion
+    FROM universidad
+    INNER JOIN video
     ON 
         universidad.ID = video.Universidad_ID
     INNER JOIN carrera 
     ON 
         universidad.ID = carrera.Universidad_ID 
-    INNER JOIN 
-        nivel_educativo 
+    INNER JOIN nivel_educativo 
     ON 
         carrera.Nivel_Educativo_ID = nivel_educativo.ID
     INNER JOIN foto
-        ON
-    universidad.ID = foto.Universidad_ID
+    ON
+        universidad.ID = foto.Universidad_ID
+    INNER JOIN ubicacion
+    ON 
+        universidad.id = ubicacion.Universidad_ID
+    INNER JOIN municipio
+    ON 
+        ubicacion.Municipio_ID = municipio.ID
     WHERE
-        universidad.ID =${id}`;
+        universidad.ID = ${id}`;
 
     pool.query(query, (err, res) => {
         if (err) {
