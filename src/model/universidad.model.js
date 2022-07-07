@@ -142,6 +142,7 @@ Universidad.getById = (id, result) => {
         universidad.Nombre, 
         universidad.Ruta_Escudo,
         contacto_universidad.Telefono,
+        universidad.Proceso_Admision,
         contacto_universidad.Correo_Electronico,
         IF(universidad.Tipo=0,'Publica','Privada') AS Tipo,
         GROUP_CONCAT(DISTINCT carrera.Nombre) Carreras,
@@ -199,7 +200,7 @@ Universidad.getById = (id, result) => {
      * @returns {Object} Lista de redes sociales de la universidad.
      */
 
-     let RedesSociales;
+    let RedesSociales;
     pool.query(queryRedesSociales, (err, res) => {
         if (err) {
             console.log("error: ", err);
@@ -238,7 +239,8 @@ Universidad.getById = (id, result) => {
          */
 
         const data = res.map(dataUni => {
-                dataUni.Telefono !== null ? 1 : dataUni.Telefono = "NA"
+                dataUni.Telefono !== null ? 1 : dataUni.Telefono = "NA",
+                dataUni.Proceso_Admision !==  null ? 1 : dataUni.Proceso_Admision = "NA",
                 dataUni.Correo_Electronico !== null ? 1 : dataUni.Correo_Electronico = "NA"
                 dataUni.Direccion !== null ? 1 : dataUni.Direccion = "NA"
             return {
