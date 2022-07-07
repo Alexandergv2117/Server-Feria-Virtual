@@ -87,6 +87,7 @@ Universidad.getAll = (result) => {
             });*/
             //delete dataUniversidades[i].Carreras;
             delete dataUniversidades[i].RecursoCarreras;
+            delete dataUniversidades[i].Carreras;
         }
 
         result(null, dataUniversidades);
