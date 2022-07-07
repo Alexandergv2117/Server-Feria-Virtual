@@ -180,7 +180,8 @@ Universidad.getById = (id, result) => {
                 RecursoVideo: dataUni.RecursoVideos.split(','),
                 FotoSeccion_ID: dataUni.FotoSeccion_ID.split(',').map(id => Number(id)),
                 TituloFoto: dataUni.Fotos.split(','),
-                RecursoFoto: dataUni.RecursoFotos.split(',')
+                RecursoFoto: dataUni.RecursoFotos.split(','),
+                url_Maps: dataUni.url_Maps.substring(13, dataUni.url_Maps.length - 88)
             }
         });
 
