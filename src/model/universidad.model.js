@@ -235,18 +235,22 @@ Universidad.getById = (id, result) => {
          * @param {Object} dataUniversidades Datos de las universidades.
          * @returns {Object} Datos de las universidades con sus carreras y recursos separados, Seccion_ID se devuelve como entero.
          */
+
         const data = res.map(dataUni => {
+                dataUni.Telefono !== null ? 1 : dataUni.Telefono = "NA"
+                dataUni.Correo_Electronico !== null ? 1 : dataUni.Correo_Electronico = "NA"
+                dataUni.Direccion !== null ? 1 : dataUni.Direccion = "NA"
             return {
                 ...dataUni,
-                Carreras: dataUni.Carreras.split(','),
-                RecursoCarreras: dataUni.RecursoCarreras.split(','),
-                VideoSeccion_ID: dataUni.VideoSeccion_ID.split(',').map(id => Number(id)),
-                TituloVideo: dataUni.Videos.split(','),
-                RecursoVideo: dataUni.RecursoVideos.split(','),
-                FotoSeccion_ID: dataUni.FotoSeccion_ID.split(',').map(id => Number(id)),
-                TituloFoto: dataUni.Fotos.split(','),
-                RecursoFoto: dataUni.RecursoFotos.split(','),
-                url_Maps: dataUni.url_Maps.substring(13, dataUni.url_Maps.length - 88)
+                Carreras: dataUni.Carreras !== null ? dataUni.Carreras.split(',') : ["NA"],
+                RecursoCarreras: dataUni.RecursoCarreras !== null ? dataUni.RecursoCarreras.split(',') : ["NA"],
+                VideoSeccion_ID: dataUni.VideoSeccion_ID !== null ? dataUni.VideoSeccion_ID.split(',').map(id => Number(id)) : ["NA"],
+                TituloVideo: dataUni.Videos !== null ? dataUni.Videos.split(',') : ["NA"],
+                RecursoVideo: dataUni.RecursoVideos !== null ? dataUni.RecursoVideos.split(',') : ["NA"],
+                FotoSeccion_ID: dataUni.FotoSeccion_ID !== null ? dataUni.FotoSeccion_ID.split(',').map(id => Number(id)) : ["NA"],
+                TituloFoto: dataUni.Fotos !== null ? dataUni.Fotos.split(',') : ["NA"],
+                RecursoFoto: dataUni.RecursoFotos !== null ? dataUni.RecursoFotos.split(',') : ["NA"],
+                url_Maps: dataUni.url_Maps !== null ? dataUni.url_Maps.substring(13, dataUni.url_Maps.length - 88) : "NA"
             }
         });
 
@@ -261,6 +265,7 @@ Universidad.getById = (id, result) => {
                 ...dataUni,
                 redesSociales: RedesSociales,
                 Carreras: dataUni.Carreras.map(carrera => {
+                    dataUni.RecursoCarreras[dataUni.Carreras.indexOf(carrera)] !== undefined ? 1 : dataUni.RecursoCarreras[dataUni.Carreras.indexOf(carrera)] = "NA";
                     return {
                         Nombre: carrera,
                         Recurso: dataUni.RecursoCarreras[dataUni.Carreras.indexOf(carrera)]
@@ -274,6 +279,7 @@ Universidad.getById = (id, result) => {
                     }
                 }),
                 Fotos: dataUni.TituloFoto.map(foto => {
+                    dataUni.RecursoFoto[dataUni.TituloFoto.indexOf(foto)] !== undefined ? 1 : dataUni.RecursoFoto[dataUni.TituloFoto.indexOf(foto)] = "NA";
                     return {
                         Seccion_ID: dataUni.FotoSeccion_ID[dataUni.TituloFoto.indexOf(foto)] > 0 ? dataUni.FotoSeccion_ID[dataUni.TituloFoto.indexOf(foto)] : 0,
                         Titulo: foto,
