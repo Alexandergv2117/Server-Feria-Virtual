@@ -117,7 +117,9 @@ Universidad.getById = (id, result) => {
     SELECT
         universidad.ID AS Universidad_ID,
         universidad.Nombre, 
-        universidad.Ruta_Escudo, 
+        universidad.Ruta_Escudo,
+        contacto_universidad.Telefono,
+        contacto_universidad.Correo_Electronico,
         IF(universidad.Tipo=0,'Publica','Privada') AS Tipo,
         GROUP_CONCAT(DISTINCT carrera.Nombre) Carreras,
         GROUP_CONCAT(DISTINCT carrera.Recurso) RecursoCarreras,
@@ -148,8 +150,34 @@ Universidad.getById = (id, result) => {
     INNER JOIN municipio
     ON 
         ubicacion.Municipio_ID = municipio.ID
+    INNER JOIN contacto_universidad
+    ON
+        universidad.ID = contacto_universidad.Universidad_ID
     WHERE
         universidad.ID = ${id}`;
+
+    let queryRedesSociales = `
+    SELECT
+        Nombre AS Red_social,
+        Recurso
+    FROM universidad_red_social
+    INNER JOIN red_social
+    ON
+        universidad_red_social.Red_Social_ID = red_social.ID
+    WHERE
+        universidad_red_social.Universidad_ID = ${id}`;
+
+
+    let RedesSociales;
+    pool.query(queryRedesSociales, (err, res) => {
+        if (err) {
+            console.log("error: ", err);
+            RedesSociales = null;
+            return;
+        }
+
+        RedesSociales = res;
+    })
 
     pool.query(query, (err, res) => {
         if (err) {
@@ -194,6 +222,7 @@ Universidad.getById = (id, result) => {
         const dataUniversidad = data.map(dataUni => {
             return {
                 ...dataUni,
+                redesSociales: RedesSociales,
                 Carreras: dataUni.Carreras.map(carrera => {
                     return {
                         Nombre: carrera,
