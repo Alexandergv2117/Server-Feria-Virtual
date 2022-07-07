@@ -115,7 +115,7 @@ Universidad.getById = (id, result) => {
 
     let query = `
     SELECT
-        universidad.ID,
+        universidad.ID AS Universidad_ID,
         universidad.Nombre, 
         universidad.Ruta_Escudo, 
         IF(universidad.Tipo=0,'Publica','Privada') AS Tipo,
@@ -153,10 +153,11 @@ Universidad.getById = (id, result) => {
             return;
         }
 
-        if (Object.entries(res).length === 0) {
+        if (res[0].Universidad_ID === null) {
             result({ message: "No existe el id en la base de datos" }, null);
             return;
         }
+        
 
         /**
          * Separar las carreras y sus recursos de cada universidad por comas, y agregar el link de youtube.
@@ -166,7 +167,6 @@ Universidad.getById = (id, result) => {
          */
         const data = res.map(dataUni => {
             return {
-                Universidad_ID: id,
                 ...dataUni,
                 Carreras: dataUni.Carreras.split(','),
                 RecursoCarreras: dataUni.RecursoCarreras.split(','),
