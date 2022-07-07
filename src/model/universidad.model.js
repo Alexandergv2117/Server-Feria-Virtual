@@ -40,6 +40,14 @@ Universidad.getAll = (result) => {
     GROUP BY universidad.ID 
     ORDER BY universidad.ID 
     ASC`;
+
+    /**
+     * Obtiene la lista de universidades con sus datos mas relevantes.
+     * @function queryGetAll
+     * @param {string} query Consulta a la base de datos los datos mas relevandes de las universidades.
+     * @param {callback} result Maneja el error y la respuesta, si esta es exitosa.
+     * @returns {Object} Lista de datos de las universidades.
+     */
     pool.query(query, (err, res) => {
         if (err) {
             console.log("error: ", err);
@@ -85,9 +93,23 @@ Universidad.getAll = (result) => {
     });
 };
 
-
+/**
+ * Retorna una lista de universidades que sean el mismo tipo de universidad, ya sea publica o privada.
+ * @function getType
+ * @param {Number} tipoUniversidad 0 para publica y 1 para privada.
+ * @param {function} result Maneja los errores y responde, si todo va bien.
+ * @returns {Object} Lista de universidades.
+ */
 Universidad.getType = (tipoUniversidad, result) => {
     let query = `SELECT universidad.ID AS Universidad_ID, universidad.Nombre, universidad.Ruta_Escudo, IF(universidad.Tipo=0,'Publica','Privada') AS Tipo, COUNT(IF(nivel_educativo.Nombre='LICENCIATURA',1, NULL)) AS LICENCIATURA, COUNT(IF(nivel_educativo.Nombre='MAESTR&IACUTE;A',1, NULL)) AS MAESTRIA, COUNT(IF(nivel_educativo.Nombre='DOCTORADO',1, NULL)) AS DOCTORADO,IF(COUNT(beca.Titulo) > 0, 1, 0) AS BECA,GROUP_CONCAT(DISTINCT carrera.Nombre) Carreras FROM universidad INNER JOIN carrera ON universidad.ID = carrera.Universidad_ID INNER JOIN nivel_educativo ON carrera.Nivel_Educativo_ID = nivel_educativo.ID LEFT JOIN beca ON universidad.ID = beca.Universidad_ID WHERE universidad.Tipo=${tipoUniversidad} GROUP BY universidad.ID ORDER BY universidad.ID ASC`;
+
+    /**
+     * Obtiene la lista de universidades con sus datos mas relevantes, tomando en cuenta el tipo de universidad.
+     * @function queryGetType
+     * @param {string} query Consulta a la base de datos los datos mas relevandes de las universidades toamando en cuenta el tipo de universidad.
+     * @param {callback} result Maneja el error y la respuesta, si esta es exitosa.
+     * @returns {Object} Lista de datos de las universidades.
+     */
     pool.query(query, (err, res) => {
         if (err) {
             console.log("error: ", err);
@@ -168,7 +190,15 @@ Universidad.getById = (id, result) => {
         universidad_red_social.Universidad_ID = ${id}`;
 
 
-    let RedesSociales;
+    /***
+     * Se encarga de obtener las redes sociales de una universidad.
+     * @function queryGetRedesSociales 
+     * @param {string} queryRedesSociales Consulta para obtener las redes sociales de una universidad.
+     * @param {function} result Maneja los errores y responde, si todo va bien.
+     * @returns {Object} Lista de redes sociales de la universidad.
+     */
+
+     let RedesSociales;
     pool.query(queryRedesSociales, (err, res) => {
         if (err) {
             console.log("error: ", err);
@@ -179,6 +209,13 @@ Universidad.getById = (id, result) => {
         RedesSociales = res;
     })
 
+    /**
+     * Se encarga de obterner todos los datos de la universidad, nombre, escudo, tipo, carreras, videos, fotos, direccion, telefono, correo electronico, redes sociales, maps, etc.
+     * @function queryGetUniversidad
+     * @param {string} query Consulta para obtener los datos de la universidad.
+     * @param {function} result Maneja los errores y responde, si todo va bien.
+     * @returns {Object} Datos de la universidad.
+     */
     pool.query(query, (err, res) => {
         if (err) {
             console.log("error: ", err);
@@ -214,7 +251,7 @@ Universidad.getById = (id, result) => {
         });
 
         /**
-         * Genera un json con los titulos y recurso, de las carreras, fotos y videos de la universidad. 
+         * Genera un json con los titulos y recurso de las carreras, fotos y videos de la universidad. 
          * @function generateJSON_Carreras
          * @param {Object} dataUni Datos de la universidad.
          * @returns {Object} Datos de la universidad y sus recursos. 
@@ -270,6 +307,13 @@ Universidad.getById = (id, result) => {
 Universidad.getByArea = (id, result) => {
     let query = `SELECT DISTINCT universidad.ID AS Universidad_ID, universidad.Nombre AS Nombre, universidad.Ruta_Escudo, IF(universidad.Tipo=0,'Publica','Privada') AS Tipo, carrera.Nombre AS carrera FROM carrera INNER JOIN carrera_area ON carrera_area.Carrera_ID=carrera.ID INNER JOIN universidad ON carrera.Universidad_ID=universidad.ID WHERE carrera_area.Area_ID =${id}`;
 
+    /**
+     * Obtiene los datos de las universidades que tengan una o mas carreras con respecto al area.
+     * @function queryGetByArea
+     * @param {string} query Consulta para obtener los datos de las universidades.
+     * @param {function} result Maneja los errores y responde, si todo va bien.
+     * @returns {Object} Datos de las universidades.
+     */
     pool.query(query, (err, res) => {
         if (err) {
             console.log("error: ", err);
@@ -294,6 +338,14 @@ Universidad.getByArea = (id, result) => {
 Universidad.getOfertaEducativa = (id, result) => {
     let query = `SELECT carrera.Universidad_ID, carrera.ID, carrera.Nombre, carrera.Recurso FROM carrera WHERE carrera.Universidad_ID = ${id}`;
 
+    /**
+     * Obtiene la oferta educativa de la universidad.
+     * @function queryGetOfertaEducativa
+     * @param {string} query Consulta para obtener la oferta educativa de la universidad.
+     * @param {function} result Maneja los errores y responde, si todo va bien.
+     * @returns {Object} Datos de la oferta educativa de la universidad.
+     * @returns {Object} Mensaje de error si no existe la universidad.
+    */
     pool.query(query, (err, res) => {
         if (err) {
             console.log("error: ", err);
@@ -350,6 +402,14 @@ Universidad.getMultimedia = (id, result) => {
 Universidad.getDireccion = (id, result) => {
     let query = `SELECT ubicacion.Universidad_ID, ubicacion.Num_Interior, ubicacion.Num_Exterior, ubicacion.Calle, ubicacion.Colonia, estado.Nombre AS estado, municipio.Nombre, ubicacion.Ciudad, ubicacion.Codigo_Postal FROM ubicacion INNER JOIN municipio ON ubicacion.Municipio_ID = municipio.ID INNER JOIN estado ON municipio.Estado_ID = estado.ID WHERE ubicacion.Universidad_ID = ${id}`;
 
+    /**
+     * Obtiene la dirección de la universidad.
+     * @function queryGetDireccion
+     * @param {string} query Consulta para obtener la dirección de la universidad.
+     * @param {function} result Maneja los errores y responde, si todo va bien.
+     * @returns {Object} Datos de la dirección de la universidad.
+     * @returns {Object} Mensaje de error si no existe la universidad.
+     */
     pool.query(query, (err, res) => {
         if (err) {
             console.log("error: ", err);
@@ -382,6 +442,15 @@ Universidad.getDireccion = (id, result) => {
  */
 Universidad.getUbicacion = (id, result) => {
     let query = `SELECT ubicacion.Universidad_ID, ubicacion.url_Maps FROM ubicacion WHERE ubicacion.Universidad_ID = ${id}`;
+
+    /**
+     * Obtiene la url de google maps de la universidad.
+     * @function queryGetUbicacion
+     * @param {string} query Consulta para obtener la url de google maps de la universidad.
+     * @param {function} result Maneja los errores y responde, si todo va bien.
+     * @returns {Object} Datos de la url de google maps de la universidad.
+     * @returns {Object} Mensaje de error si no existe la universidad.
+     */
     pool.query(query, (err, res) => {
         if (err) {
             console.log("error: ", err);
@@ -416,6 +485,14 @@ Universidad.getUbicacion = (id, result) => {
 getFotos = (id, result) => {
     let queryFoto = `SELECT foto.Universidad_ID, foto.Titulo, foto.Recurso FROM foto WHERE foto.Universidad_ID = ${id}`;
 
+    /**
+     * Obtiene los links de las fotos de la universidad.
+     * @function queryGetFotos
+     * @param {string} query Consulta para obtener los links de las fotos de la universidad.
+     * @param {function} result Maneja los errores y responde, si todo va bien.
+     * @returns {Object} Datos de los links de las fotos de la universidad.
+     * @returns {Object} Mensaje de error si no existe la universidad.
+     */
     pool.query(queryFoto, (err, res) => {
         if (err) {
             console.log("error: ", err);
@@ -442,6 +519,15 @@ getVideos = (id, result) => {
     const urlYoutube = "https://www.youtube.com/watch?v=";
 
     let queryVideo = `SELECT video.Universidad_ID, video.ID, video.Titulo, video.Recurso FROM video WHERE video.Universidad_ID = ${id}`;
+
+    /**
+     * Obtiene los links de los videos de la universidad.
+     * @function queryGetVideos
+     * @param {string} query Consulta para obtener los links de los videos de la universidad.
+     * @param {function} result Maneja los errores y responde, si todo va bien.
+     * @returns {Object} Datos de los links de los videos de la universidad.
+     * @returns {Object} Mensaje de error si no existe la universidad.
+     */
     pool.query(queryVideo, (err, res) => {
         if (err) {
             console.log("error: ", err);
