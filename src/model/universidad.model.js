@@ -41,56 +41,63 @@ Universidad.getAll = (result) => {
     ORDER BY universidad.ID 
     ASC`;
 
-    /**
-     * Obtiene la lista de universidades con sus datos mas relevantes.
-     * @function queryGetAll
-     * @param {string} query Consulta a la base de datos los datos mas relevandes de las universidades.
-     * @param {callback} result Maneja el error y la respuesta, si esta es exitosa.
-     * @returns {Object} Lista de datos de las universidades.
-     */
-    pool.query(query, (err, res) => {
+    let areas;
+    let queryGetArea = `
+    SELECT
+        carrera.Universidad_ID,
+        GROUP_CONCAT(DISTINCT carrera_clasificacion.area1) AS area
+    FROM 
+        carrera
+    INNER JOIN carrera_clasificacion
+    ON 
+        carrera.Nombre = carrera_clasificacion.nombre_carrera
+    GROUP BY carrera.Universidad_ID
+    ORDER BY carrera.Universidad_ID
+    `;
+
+    pool.query(queryGetArea, (err, res) => {
         if (err) {
             console.log("error: ", err);
-            result(null, { message: "Ocurrio un error al obtener las universidades" });
+            result({ message: "Ocurrio un error al obtener los datos de la universidad" }, null);
             return;
         }
-        /**
-         * Separar las carreras y sus recursos de cada universidad por comas.
-         * @function splitCarreras 
-         * @param {Object} dataUniversidades Datos de las universidades.
-         * @returns {Object} Datos de las universidades con sus carreras y recursos separados.
-        */
-        const dataUniversidades = res.map(dataUni => {
-            return {
-                ...dataUni,
-                Carreras: dataUni.Carreras.split(','),
-                //RecursoCarreras: dataUni.RecursoCarreras.split(',')
+
+        areas = res;
+
+        pool.query(query, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                result({ message: "Ocurrio un error al obtener los datos de la universidad" }, null);
+                return;
             }
-        });
 
-        /**
-         * Arregla el duplicado de carreras y genera un json de las carreras y sus recursos
-         * @function removeDuplicates
-         * @param {array} array Arreglo de carreras
-         * @returns {array} Arreglo de carreras sin duplicados
-         * @example
-         * removeDuplicates(['carrera1', 'carrera2', 'carrera1'])
-         * // ['carrera1', 'carrera2']
-         */
-        for (let i = 0; i < dataUniversidades.length; i++) {
-            dataUniversidades[i].LICENCIATURA = dataUniversidades[i].Carreras.length;
-            /*dataUniversidades[i].Carrera = dataUniversidades[i].Carreras.map(carrera => {
+            if (Object.entries(res).length === 0) {
+                result(null, { message: "No existen universidades" });
+                return;
+            }
+
+            const dataUniversidades = res.map(dataUni => {
                 return {
-                    Nombre: carrera,
-                    Recurso: dataUniversidades[i].RecursoCarreras[i]
+                    ...dataUni,
+                    area: "NA",
+                    Carreras: dataUni.Carreras.split(','),
+                    //RecursoCarreras: dataUni.RecursoCarreras.split(',')
                 }
-            });*/
-            //delete dataUniversidades[i].Carreras;
-            delete dataUniversidades[i].RecursoCarreras;
-            delete dataUniversidades[i].Carreras;
-        }
+            });
 
-        result(null, dataUniversidades);
+            for (let i = 0; i < dataUniversidades.length; i++) {
+                dataUniversidades[i].LICENCIATURA = dataUniversidades[i].Carreras.length;
+                for (let j = 0; j < areas.length; j++) {
+                    if (dataUniversidades[i].Universidad_ID === areas[j].Universidad_ID) {
+                        dataUniversidades[i].area = areas[j].area;
+                    }
+                }
+                delete dataUniversidades[i].Carreras;
+                delete dataUniversidades[i].RecursoCarreras;
+            }
+
+            result(null, dataUniversidades);
+        });
     });
 };
 
@@ -229,7 +236,7 @@ Universidad.getById = (id, result) => {
             result({ message: "No existe el id en la base de datos" }, null);
             return;
         }
-        
+
 
         /**
          * Separar las carreras y sus recursos de cada universidad por comas, y agregar el link de youtube.
@@ -239,10 +246,10 @@ Universidad.getById = (id, result) => {
          */
 
         const data = res.map(dataUni => {
-                dataUni.Telefono !== null ? 1 : dataUni.Telefono = "NA",
-                dataUni.Proceso_Admision !==  null ? 1 : dataUni.Proceso_Admision = "NA",
+            dataUni.Telefono !== null ? 1 : dataUni.Telefono = "NA",
+                dataUni.Proceso_Admision !== null ? 1 : dataUni.Proceso_Admision = "NA",
                 dataUni.Correo_Electronico !== null ? 1 : dataUni.Correo_Electronico = "NA"
-                dataUni.Direccion !== null ? 1 : dataUni.Direccion = "NA"
+            dataUni.Direccion !== null ? 1 : dataUni.Direccion = "NA"
             return {
                 ...dataUni,
                 Carreras: dataUni.Carreras !== null ? dataUni.Carreras.split(',') : ["NA"],
