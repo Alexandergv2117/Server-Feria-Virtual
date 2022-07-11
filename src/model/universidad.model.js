@@ -217,6 +217,12 @@ Universidad.getById = (id, result) => {
 
         RedesSociales = res;
 
+        /**
+         * Validar si el objeto esta vacio.
+         * @function isEmptyRes
+         * @param {Object} obj Objeto a validar.
+         * @returns {Object} Asigna el valor NA a los campos vacios.
+         */
         if(Object.entries(RedesSociales).length === 0) {
             RedesSociales = {
                 Red_social: "NA",
@@ -227,7 +233,7 @@ Universidad.getById = (id, result) => {
 
     /**
      * Se encarga de obterner todos los datos de la universidad, nombre, escudo, tipo, carreras, videos, fotos, direccion, telefono, correo electronico, redes sociales, maps, etc.
-     * @function queryGetUniversidad
+     * @function queryGetUniversidades
      * @param {string} query Consulta para obtener los datos de la universidad.
      * @param {function} result Maneja los errores y responde, si todo va bien.
      * @returns {Object} Datos de la universidad.
@@ -239,11 +245,10 @@ Universidad.getById = (id, result) => {
             return;
         }
 
-        if (res[0].Universidad_ID === null) {
+        if (Object.entries(res).length === 0) {
             result({ message: "No existe el id en la base de datos" }, null);
             return;
         }
-
 
         /**
          * Separar las carreras y sus recursos de cada universidad por comas, y agregar el link de youtube.
@@ -253,10 +258,11 @@ Universidad.getById = (id, result) => {
          */
 
         const data = res.map(dataUni => {
-            dataUni.Telefono !== null ? 1 : dataUni.Telefono = "NA",
-                dataUni.Proceso_Admision !== null ? 1 : dataUni.Proceso_Admision = "NA",
-                dataUni.Correo_Electronico !== null ? 1 : dataUni.Correo_Electronico = "NA"
-            dataUni.Direccion !== null ? 1 : dataUni.Direccion = "NA"
+            dataUni.Telefono !== null ? 1 : dataUni.Telefono = "NA";
+            dataUni.Proceso_Admision !== null ? 1 : dataUni.Proceso_Admision = "NA";
+            dataUni.Correo_Electronico !== null ? 1 : dataUni.Correo_Electronico = "NA";
+            dataUni.Direccion !== null ? 1 : dataUni.Direccion = "NA";
+            
             return {
                 ...dataUni,
                 Carreras: dataUni.Carreras !== null ? dataUni.Carreras.split(',') : ["NA"],
