@@ -216,7 +216,14 @@ Universidad.getById = (id, result) => {
         }
 
         RedesSociales = res;
-    })
+
+        if(Object.entries(RedesSociales).length === 0) {
+            RedesSociales = {
+                Red_social: "NA",
+                Recurso: "NA"
+            };
+        }
+    });
 
     /**
      * Se encarga de obterner todos los datos de la universidad, nombre, escudo, tipo, carreras, videos, fotos, direccion, telefono, correo electronico, redes sociales, maps, etc.
@@ -285,7 +292,7 @@ Universidad.getById = (id, result) => {
                     return {
                         Seccion_ID: dataUni.VideoSeccion_ID[dataUni.TituloVideo.indexOf(video)] > 0 ? dataUni.VideoSeccion_ID[dataUni.TituloVideo.indexOf(video)] : 0,
                         Titulo: video,
-                        Recurso: urlYoutube + dataUni.RecursoVideo[dataUni.TituloVideo.indexOf(video)]
+                        Recurso: dataUni.RecursoVideo[dataUni.TituloVideo.indexOf(video)] === "NA" ? "NA" : urlYoutube + dataUni.RecursoVideo[dataUni.TituloVideo.indexOf(video)]
                     }
                 }),
                 Fotos: dataUni.TituloFoto.map(foto => {
