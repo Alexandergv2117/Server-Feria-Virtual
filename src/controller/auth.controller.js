@@ -59,7 +59,7 @@ exports.login = (req, res) => {
             });
         } else {
             if (data) {
-            const token = jwt.sign({ id: data.ID }, "UPQROOKey");
+            const token = jwt.sign({ id: data.ID }, "UPQROOKey", { expiresIn: '1200s' });
             res.status(200).json({ token, ...data._doc });
             } else {
                 res.status(400).send({msg: "El correo electronico no esta registrado" })
