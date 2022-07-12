@@ -29,6 +29,7 @@ module.exports = {
             'any.required': `"El Apellido Materno" es un campo requerido`,
           }),
         Correo_Electronico: joi.string()
+        .email({ tlds: { allow: true } })
         .max(100)
         .required()
         .messages({
@@ -36,6 +37,7 @@ module.exports = {
             'string.empty': `"El campo Correo Electronico" no puede estar vacio`,
             'string.max': `"El campo Correo Electronico" no puede tener mas de 100 caracteres`,
             'any.required': `"El Correo Electronico" es un campo requerido`,
+            'string.email': `"El campo Correo Electronico" debe ser un correo electronico valido`,
           }),
         Telefono: joi.string()
         .max(10)
