@@ -1,8 +1,8 @@
 module.exports = {
     database: {
         host: 'sql5.freemysqlhosting.net',
-        user: 'sql5505926',
-        password: 'QnxfxnsTv4',
-        database: 'sql5505926'
+        user: 'sql5507516',
+        password: 'Zlx3PinmAH',
+        database: 'sql5507516'
     }
 };
