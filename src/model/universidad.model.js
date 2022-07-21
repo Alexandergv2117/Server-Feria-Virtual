@@ -160,6 +160,8 @@ Universidad.getById = (id, result) => {
         GROUP_CONCAT(DISTINCT foto.Seccion_ID) FotoSeccion_ID,
         GROUP_CONCAT(DISTINCT foto.Titulo) Fotos,
         GROUP_CONCAT(DISTINCT foto.Recurso) RecursoFotos,
+        GROUP_CONCAT(DISTINCT beca.Titulo) Becas,
+        GROUP_CONCAT(DISTINCT beca.Recurso) RecursoBecas,
         ubicacion.url_Maps,
         CONCAT(Num_Interior, " ", Num_Exterior, " ", Calle, " ", Colonia, " ", Ciudad, " ", municipio.Nombre, " ", Codigo_Postal) AS Direccion
     FROM universidad
@@ -184,6 +186,9 @@ Universidad.getById = (id, result) => {
     INNER JOIN contacto_universidad
     ON
         universidad.ID = contacto_universidad.Universidad_ID
+    LEFT JOIN beca
+    ON
+        universidad.ID = beca.Universidad_ID
     WHERE
         universidad.ID = ${id}`;
 
@@ -273,6 +278,8 @@ Universidad.getById = (id, result) => {
                 FotoSeccion_ID: dataUni.FotoSeccion_ID !== null ? dataUni.FotoSeccion_ID.split(',').map(id => Number(id)) : ["NA"],
                 TituloFoto: dataUni.Fotos !== null ? dataUni.Fotos.split(',') : ["NA"],
                 RecursoFoto: dataUni.RecursoFotos !== null ? dataUni.RecursoFotos.split(',') : ["NA"],
+                Becas: dataUni.Becas !== null ? dataUni.Becas.split(',') : ["NA"],
+                RecursoBecas: dataUni.RecursoBecas !== null ? dataUni.RecursoBecas.split(',') : ["NA"],
                 url_Maps: dataUni.url_Maps !== null ? dataUni.url_Maps.substring(13, dataUni.url_Maps.length - 88) : "NA"
             }
         });
@@ -287,6 +294,12 @@ Universidad.getById = (id, result) => {
             return {
                 ...dataUni,
                 redesSociales: RedesSociales,
+                /**
+                 * Genera un json con los titulos y recursos.
+                 * @function generateJSON_Carreras 
+                 * @param {Object} dataUni Datos de la universidad.
+                 * @returns {Object} Datos de la universidad y sus recursos.
+                 */
                 Carreras: dataUni.Carreras.map(carrera => {
                     dataUni.RecursoCarreras[dataUni.Carreras.indexOf(carrera)] !== undefined ? 1 : dataUni.RecursoCarreras[dataUni.Carreras.indexOf(carrera)] = "NA";
                     return {
@@ -308,6 +321,13 @@ Universidad.getById = (id, result) => {
                         Titulo: foto,
                         Recurso: dataUni.RecursoFoto[dataUni.TituloFoto.indexOf(foto)]
                     }
+                }),
+                Becas: dataUni.Becas.map(beca => {
+                    dataUni.RecursoBecas[dataUni.Becas.indexOf(beca)] !== undefined ? 1 : dataUni.RecursoBecas[dataUni.Becas.indexOf(beca)] = "NA";
+                    return {
+                        Nombre: beca,
+                        Recurso: dataUni.RecursoBecas[dataUni.Becas.indexOf(beca)]
+                    }
                 })
             }
         });
@@ -322,6 +342,7 @@ Universidad.getById = (id, result) => {
         delete dataUniversidad[0].TituloVideo;
         delete dataUniversidad[0].VideoSeccion_ID;
         delete dataUniversidad[0].FotoSeccion_ID;
+        delete dataUniversidad[0].RecursoBecas;
 
         result(null, dataUniversidad[0]);
     });
