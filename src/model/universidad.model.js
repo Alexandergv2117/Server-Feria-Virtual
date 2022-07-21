@@ -162,6 +162,8 @@ Universidad.getById = (id, result) => {
         GROUP_CONCAT(DISTINCT foto.Recurso) RecursoFotos,
         GROUP_CONCAT(DISTINCT beca.Titulo) Becas,
         GROUP_CONCAT(DISTINCT beca.Recurso) RecursoBecas,
+        GROUP_CONCAT(DISTINCT red_social.Nombre) RedesSocialesNombre,
+        GROUP_CONCAT(DISTINCT universidad_red_social.Recurso) RedesSocialesRecurso,
         ubicacion.url_Maps,
         CONCAT(Num_Interior, " ", Num_Exterior, " ", Calle, " ", Colonia, " ", Ciudad, " ", municipio.Nombre, " ", Codigo_Postal) AS Direccion
     FROM universidad
@@ -189,52 +191,14 @@ Universidad.getById = (id, result) => {
     LEFT JOIN beca
     ON
         universidad.ID = beca.Universidad_ID
-    WHERE
-        universidad.ID = ${id}`;
-
-    let queryRedesSociales = `
-    SELECT
-        Nombre AS Red_social,
-        Recurso
-    FROM universidad_red_social
+    INNER JOIN universidad_red_social
+    ON 
+        universidad.ID = universidad_red_social.Universidad_ID
     INNER JOIN red_social
-    ON
+    ON  
         universidad_red_social.Red_Social_ID = red_social.ID
     WHERE
-        universidad_red_social.Universidad_ID = ${id}`;
-
-
-    /***
-     * Se encarga de obtener las redes sociales de una universidad.
-     * @function queryGetRedesSociales 
-     * @param {string} queryRedesSociales Consulta para obtener las redes sociales de una universidad.
-     * @param {function} result Maneja los errores y responde, si todo va bien.
-     * @returns {Object} Lista de redes sociales de la universidad.
-     */
-
-    let RedesSociales;
-    pool.query(queryRedesSociales, (err, res) => {
-        if (err) {
-            console.log("error: ", err);
-            RedesSociales = null;
-            return;
-        }
-
-        RedesSociales = res;
-
-        /**
-         * Validar si el objeto esta vacio.
-         * @function isEmptyRes
-         * @param {Object} obj Objeto a validar.
-         * @returns {Object} Asigna el valor NA a los campos vacios.
-         */
-        if(Object.entries(RedesSociales).length === 0) {
-            RedesSociales = {
-                Red_social: "NA",
-                Recurso: "NA"
-            };
-        }
-    });
+        universidad.ID = ${id}`;
 
     /**
      * Se encarga de obterner todos los datos de la universidad, nombre, escudo, tipo, carreras, videos, fotos, direccion, telefono, correo electronico, redes sociales, maps, etc.
@@ -280,6 +244,8 @@ Universidad.getById = (id, result) => {
                 RecursoFoto: dataUni.RecursoFotos !== null ? dataUni.RecursoFotos.split(',') : ["NA"],
                 Becas: dataUni.Becas !== null ? dataUni.Becas.split(',') : ["NA"],
                 RecursoBecas: dataUni.RecursoBecas !== null ? dataUni.RecursoBecas.split(',') : ["NA"],
+                RedesSocialesNombre: dataUni.RedesSocialesNombre !== null ? dataUni.RedesSocialesNombre.split(',') : ["NA"],
+                RedesSocialesRecurso: dataUni.RedesSocialesRecurso !== null ? dataUni.RedesSocialesRecurso.split(',') : ["NA"],
                 url_Maps: dataUni.url_Maps !== null ? dataUni.url_Maps.substring(13, dataUni.url_Maps.length - 88) : "NA"
             }
         });
@@ -293,7 +259,6 @@ Universidad.getById = (id, result) => {
         const dataUniversidad = data.map(dataUni => {
             return {
                 ...dataUni,
-                redesSociales: RedesSociales,
                 /**
                  * Genera un json con los titulos y recursos.
                  * @function generateJSON_Carreras 
@@ -328,6 +293,13 @@ Universidad.getById = (id, result) => {
                         Nombre: beca,
                         Recurso: dataUni.RecursoBecas[dataUni.Becas.indexOf(beca)]
                     }
+                }),
+                redesSociales: dataUni.RedesSocialesNombre.map(red => {
+                    dataUni.RedesSocialesRecurso[dataUni.RedesSocialesNombre.indexOf(red)] !== undefined ? 1 : dataUni.RedesSocialesRecurso[dataUni.RedesSocialesNombre.indexOf(red)] = "NA";
+                    return {
+                        Nombre: red,
+                        Recurso: dataUni.RedesSocialesRecurso[dataUni.RedesSocialesNombre.indexOf(red)]
+                    }
                 })
             }
         });
@@ -343,6 +315,8 @@ Universidad.getById = (id, result) => {
         delete dataUniversidad[0].VideoSeccion_ID;
         delete dataUniversidad[0].FotoSeccion_ID;
         delete dataUniversidad[0].RecursoBecas;
+        delete dataUniversidad[0].RedesSocialesNombre;
+        delete dataUniversidad[0].RedesSocialesRecurso;
 
         result(null, dataUniversidad[0]);
     });
