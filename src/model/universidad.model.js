@@ -37,6 +37,7 @@
          carrera.Nivel_Educativo_ID = nivel_educativo.ID 
      LEFT JOIN beca ON 
          universidad.ID = beca.Universidad_ID 
+     WHERE universidad.Estatus_ID = 3
      GROUP BY universidad.ID 
      ORDER BY universidad.ID 
      ASC`;
@@ -45,7 +46,9 @@
      let queryGetArea = `
      SELECT
          carrera.Universidad_ID,
-         GROUP_CONCAT(DISTINCT carrera_clasificacion.area1) AS area
+         GROUP_CONCAT(DISTINCT carrera_clasificacion.area1) AS area1,
+         CONCAT (GROUP_CONCAT(DISTINCT carrera_clasificacion.area2)) AS area2,
+         CONCAT (GROUP_CONCAT(DISTINCT carrera_clasificacion.area3)) AS area3
      FROM 
          carrera
      INNER JOIN carrera_clasificacion
@@ -89,7 +92,7 @@
                  dataUniversidades[i].LICENCIATURA = dataUniversidades[i].Carreras.length;
                  for (let j = 0; j < areas.length; j++) {
                      if (dataUniversidades[i].Universidad_ID === areas[j].Universidad_ID) {
-                         dataUniversidades[i].area = areas[j].area;
+                         dataUniversidades[i].area = areas[j].area1 + " " + areas[j].area2 + " " + areas[j].area3;
                      }
                  }
                  delete dataUniversidades[i].Carreras;
